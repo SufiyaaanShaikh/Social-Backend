@@ -28,17 +28,26 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors({ origin: "*" }));
+
+// Updated CORS configuration with specific options
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://your-frontend-domain.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+// Apply CORS with our options
+app.use(cors(corsOptions));
+
+// For preflight requests
+app.options('*', cors(corsOptions));
+
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
-const storage = multer.memoryStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/assets");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
+// Use memory storage for multer in serverless environment
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 app.post("/auth/register", upload.single("picture"), register);
@@ -56,9 +65,12 @@ mongoose
   })
   .then(() => {
     app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
-
+    
     // Add dummy data to the database
     // User.insertMany(users);
     // Post.insertMany(posts);
   })
   .catch((error) => console.error(`${error} - MongoDB connection failed`));
+
+// For Vercel serverless deployment
+export default app;
