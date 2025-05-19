@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { uploadonCloudinary } from "../cdn/cloudinary.js";
 
 export const register = async (req, res) => {
   try {
@@ -22,13 +23,25 @@ export const register = async (req, res) => {
       lastName,
       email,
       password: hashedPassword,
-      picturePath,
       friends,
       location,
       occupation,
       viewedProfile: Math.floor(Math.random() * 10000),
       impressions: Math.floor(Math.random() * 10000),
     });
+
+    if (req.file) {
+      const uploadResult = await uploadonCloudinary(req.file.path);
+
+    if (!uploadResult) {
+      throw new ApiError(500, "Failed to upload profile photo");
+    }
+
+    // Add new image details to update query
+    newUser.picturePath = uploadResult.secure_url;
+    newUser.picturePathID = uploadResult.public_id;
+    }
+
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
   } catch (error) {
