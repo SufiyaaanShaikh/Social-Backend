@@ -1,19 +1,21 @@
 {
     "version": 2,
+    "env": {
+      "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+    },
     "builds": [
-     {
-      "src": "index.js",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["dist/**"] },
-      "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      {
+        "src": "index.js",
+        "use": "@vercel/node",
+        "config": {
+          "includeFiles": ["dist/**"]
+        }
       }
-     }
     ],
     "routes": [
-     {
-      "src": "/(.*)",
-      "dest": "index.js"
-     }
+      {
+        "src": "/(.*)",
+        "dest": "index.js"
+      }
     ]
-   }
+  }  
