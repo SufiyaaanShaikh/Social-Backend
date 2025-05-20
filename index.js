@@ -33,6 +33,7 @@ app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 /* FILE STORAGE */
+// Using memory storage for Vercel compatibility
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
