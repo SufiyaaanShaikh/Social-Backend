@@ -11,11 +11,30 @@ export const createPost = async (req, res) => {
       lastName: user.lastName,
       location: user.location,
       description,
-      picturePath,
       userPicturePath: user.picturePath,
       likes: {},
       comments: [],
     });
+   if (req.file) {
+      try {
+        // Using the updated Cloudinary function for buffer upload
+        const uploadResult = await uploadToCloudinary(
+          req.file.buffer,
+          req.file.mimetype
+        );
+        
+        if (uploadResult) {
+          newPost.picturePath = uploadResult.secure_url;
+          newPost.picturePathID = uploadResult.public_id;
+        } else {
+          console.log("Image upload failed, continuing with default image");
+        }
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        // Continue with user creation even if image upload fails
+      }
+    }
+
     await newPost.save();
     const post = await Post.find();
     res.status(201).json(post);
